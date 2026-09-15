@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Test Data Contract",
+  "description": "Machine-readable test-data requirements produced before test-case and automation-script generation.",
+  "type": "object",
+  "required": [
+    "status",
+    "test_data"
+  ],
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "DATA_SOURCE_REQUIRED"
+      ],
+      "description": "READY only when every required data item can be resolved in the approved test environment."
+    },
+    "test_data": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "entity",
+          "type",
+          "application_required",
+          "test_data_required",
+          "classification",
+          "strategy",
+          "constraints",
+          "sensitive"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "description": "Stable, automation-consumable identifier in lower snake_case."
+          },
+          "entity": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "application_required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "const": "UNKNOWN"
+              }
+            ],
+            "description": "Whether the application requires the value. Use UNKNOWN only when the supplied evidence does not identify the mandatory-field rule."
+          },
+          "test_data_required": {
+            "type": "boolean"
+          },
+          "condition": {
+            "type": "string"
+          },
+          "test_condition": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string",
+            "enum": [
+              "STATIC",
+              "DYNAMIC",
+              "UNIQUE",
+              "BOUNDARY",
+              "EXISTING_FIXTURE",
+              "API_CREATE",
+              "DB_LOOKUP",
+              "SYNTHETIC",
+              "SECRET_REFERENCE"
+            ]
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Automation-consumable environment variable, fixture key, approved lookup key, or runtime-generator key. Never a secret value."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "ENVIRONMENT",
+              "SECRET_STORE",
+              "FIXTURE",
+              "RUNTIME_GENERATOR",
+              "API",
+              "DATABASE",
+              "APPLICATION_UI",
+              "REQUIREMENT",
+              "UNRESOLVED"
+            ]
+          },
+          "strategy": {
+            "type": "string",
+            "minLength": 1
+          },
+          "constraints": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sensitive": {
+            "type": "boolean"
+          },
+          "example": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Illustrative non-sensitive value only; it is not a production value or secret."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "TEST_RUN",
+              "TEST_SUITE",
+              "SHARED_TEST_ENVIRONMENT"
+            ],
+            "description": "Lifetime of generated or reserved data."
+          },
+          "cleanup_strategy": {
+            "type": "string",
+            "minLength": 1,
+            "description": "How created data is removed or made harmless after the test run."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "classification": {
+                  "const": "SECRET_REFERENCE"
+                }
+              },
+              "required": [
+                "classification"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "properties": {
+                "sensitive": {
+                  "const": true
+                }
+              },
+              "required": [
+                "reference"
+              ]
+            }
+          },
+          {
+            "if": {
+              "type": "object",
+              "properties": {
+                "classification": {
+                  "const": "UNIQUE"
+                }
+              },
+              "required": [
+                "classification"
+              ]
+            },
+            "then": {
+              "type": "object",
+              "required": [
+                "scope",
+                "cleanup_strategy"
+              ]
+            }
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "unresolved_data": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "uniqueItems": true,
+      "description": "Required data identifiers that cannot yet be resolved from an approved source."
+    },
+    "test_step_data": {
+      "type": "array",
+      "description": "Test-data expression for every generated test step. This is the source for the test case Test Data column.",
+      "items": {
+        "type": "object",
+        "required": [
+          "test_case_id",
+          "step",
+          "action",
+          "test_data"
+        ],
+        "properties": {
+          "test_case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "step": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "test_data": {
+            "type": "string",
+            "minLength": 1,
+            "description": "A semicolon-separated name=reference expression, DATA_SOURCE_REQUIRED: <name>, or N/A. Never include a secret value."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "const": "DATA_SOURCE_REQUIRED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "type": "object",
+        "required": [
+          "unresolved_data"
+        ],
+        "properties": {
+          "unresolved_data": {
+            "type": "array",
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
