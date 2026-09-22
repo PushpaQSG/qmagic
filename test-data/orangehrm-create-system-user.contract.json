@@ -1,0 +1,253 @@
+{
+    "status": "DATA_SOURCE_REQUIRED",
+    "test_data": [
+        {
+            "name": "admin_username",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "ORANGEHRM_ADMIN_USERNAME",
+            "source": "UNRESOLVED",
+            "strategy": "Resolve an approved administrator account from environment configuration; do not invent credentials.",
+            "constraints": [
+                "Must belong to a user with Admin role in OrangeHRM",
+                "Must not be a production account"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "admin_password",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "SECRET_REFERENCE",
+            "reference": "ORANGEHRM_ADMIN_PASSWORD",
+            "source": "UNRESOLVED",
+            "depends_on": [
+                "admin_username"
+            ],
+            "strategy": "Resolve from an approved secret store or .env variable once confirmed; never hardcode.",
+            "constraints": [
+                "Must correspond to admin_username",
+                "Must never appear in logs, reports, or example values"
+            ],
+            "sensitive": true
+        },
+        {
+            "name": "role_option",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "ROLE_OPTION_REQUIRED",
+            "source": "UNRESOLVED",
+            "strategy": "Use an approved Role dropdown value confirmed from application UI or documentation (e.g. Admin, ESS); not yet confirmed.",
+            "constraints": [
+                "Must be one of the values populated in the Add User 'User Role' dropdown"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "status_option",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "STATUS_OPTION_REQUIRED",
+            "source": "UNRESOLVED",
+            "strategy": "Use an approved Status dropdown value (e.g. Enabled/Disabled) confirmed from application UI; not yet confirmed.",
+            "constraints": [
+                "Must be one of the values populated in the Add User 'Status' dropdown"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "employee_to_link",
+            "entity": "Employee",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "DB_LOOKUP",
+            "reference": "EMPLOYEE_TO_LINK_REQUIRED",
+            "source": "UNRESOLVED",
+            "strategy": "Look up an existing, non-terminated employee record via an approved API or database source; must not assume a specific employee exists.",
+            "constraints": [
+                "Employee record must already exist in the system",
+                "Employee must not already have a linked system user (if that is an application constraint) - unconfirmed"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "new_username",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "UNIQUE",
+            "reference": "new_system_user_username",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: uniqueUsername('sysuser')",
+            "strategy": "Generate a unique username at run time (e.g. prefix + timestamp/uuid) to avoid collisions across parallel runs.",
+            "constraints": [
+                "Must not already exist as a system user",
+                "Must satisfy OrangeHRM username format constraints (unconfirmed max length/character set)"
+            ],
+            "sensitive": false,
+            "scope": "TEST_RUN",
+            "cleanup_strategy": "Delete the created system user via Admin > User Management > Users after the test (see cleanup test_step_data step)."
+        },
+        {
+            "name": "new_user_password",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "SYNTHETIC",
+            "reference": "new_system_user_password",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: securePassword()",
+            "strategy": "Generate a synthetic password at run time satisfying OrangeHRM password policy; never hardcode or log it.",
+            "constraints": [
+                "Must satisfy OrangeHRM password complexity policy (exact rules unconfirmed)"
+            ],
+            "sensitive": true
+        },
+        {
+            "name": "confirm_password",
+            "entity": "SystemUser",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "SYNTHETIC",
+            "depends_on": [
+                "new_user_password"
+            ],
+            "reference": "new_system_user_password",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: same value as new_user_password",
+            "strategy": "Reuse the exact value generated for new_user_password to satisfy the confirmation field.",
+            "constraints": [
+                "Must exactly match new_user_password"
+            ],
+            "sensitive": true
+        },
+        {
+            "name": "success_notification_message",
+            "entity": "Notification",
+            "type": "string",
+            "application_required": "UNKNOWN",
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "SUCCESS_NOTIFICATION_TEXT_REQUIRED",
+            "source": "UNRESOLVED",
+            "strategy": "Confirm the exact success toast/notification text from the application UI or documented specification; not yet confirmed.",
+            "constraints": [
+                "Exact wording not confirmed by requirement or application context"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "base_url",
+            "entity": "Environment",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "BASE_URL",
+            "source": "ENVIRONMENT",
+            "location": ".env -> BASE_URL",
+            "strategy": "Use the configured application base URL for navigation.",
+            "constraints": [
+                "Must point to a non-production OrangeHRM environment"
+            ],
+            "sensitive": false
+        }
+    ],
+    "unresolved_data": [
+        "admin_username",
+        "admin_password",
+        "role_option",
+        "status_option",
+        "employee_to_link",
+        "success_notification_message"
+    ],
+    "test_step_data": [
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 1,
+            "action": "Log in to OrangeHRM as an Administrator.",
+            "test_data": "DATA_SOURCE_REQUIRED: admin_username; DATA_SOURCE_REQUIRED: admin_password"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 2,
+            "action": "Navigate to Admin > User Management > Users and click Add.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 3,
+            "action": "Select a User Role.",
+            "test_data": "DATA_SOURCE_REQUIRED: role_option"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 4,
+            "action": "Search and select an existing Employee Name to link.",
+            "test_data": "DATA_SOURCE_REQUIRED: employee_to_link"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 5,
+            "action": "Select a Status.",
+            "test_data": "DATA_SOURCE_REQUIRED: status_option"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 6,
+            "action": "Enter a Username.",
+            "test_data": "new_username=new_system_user_username"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 7,
+            "action": "Enter a Password.",
+            "test_data": "new_user_password=new_system_user_password"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 8,
+            "action": "Enter the Confirm Password value.",
+            "test_data": "confirm_password=new_system_user_password"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 9,
+            "action": "Click Save.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 10,
+            "action": "Verify the success notification is displayed.",
+            "test_data": "DATA_SOURCE_REQUIRED: success_notification_message"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 11,
+            "action": "Verify the new user appears in the Admin user list.",
+            "test_data": "new_username=new_system_user_username"
+        },
+        {
+            "test_case_id": "TC-SYSUSER-001",
+            "step": 12,
+            "action": "Cleanup: delete the created system user from Admin > User Management > Users.",
+            "test_data": "new_username=new_system_user_username"
+        }
+    ]
+}

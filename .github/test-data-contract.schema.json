@@ -99,6 +99,11 @@
               "UNRESOLVED"
             ]
           },
+          "location": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Concrete, resolvable location for the source: file path (e.g. .env), endpoint, table name, or fixture path. Not required when source is UNRESOLVED."
+          },
           "strategy": {
             "type": "string",
             "minLength": 1

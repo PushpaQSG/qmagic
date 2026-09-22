@@ -39,6 +39,7 @@ Your responsibility is to analyze a requirement, acceptance criteria, and availa
 - A secret is a reference, never a value. For a `SECRET_REFERENCE`, provide the approved secret-store or environment-variable key in `reference` and set `sensitive` to `true`.
 - For `UNIQUE`, `SYNTHETIC`, or `API_CREATE` data, specify its run/suite/environment `scope` and `cleanup_strategy` whenever data can persist.
 - For `EXISTING_FIXTURE`, `DB_LOOKUP`, or `APPLICATION_UI`, provide a stable `reference` when one is known. Do not claim the contract is `READY` without an approved resolution path.
+- Once `source` is identified, resolve its concrete `location` (e.g. `.env` variable, secret-store key, fixture file path, API endpoint, database table, UI control) per the Source Location Map in `.github/instructions/test-data.instrcutions.md`. Never guess a location; if unconfirmed, use `source: "UNRESOLVED"` and add the item to `unresolved_data`.
 
 ## Input
 

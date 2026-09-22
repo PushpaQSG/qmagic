@@ -63,6 +63,30 @@ Use one of:
 20. Before test-case generation, validate the JSON contract against `.github/test-data-contract.schema.json`. Do not use an invalid contract as a source for automation.
 21. When test steps are known, add `test_step_data` to the contract. It must contain one entry per test-case step with `test_case_id`, `step`, `action`, and `test_data`.
 22. Format each step value as semicolon-separated `name=reference` pairs. Use `N/A` only when the action truly needs no data; use `DATA_SOURCE_REQUIRED: <name>` when it cannot run until a source is provided.
+23. Once `source` is identified, resolve and record the concrete `location` where that data actually lives (see Source Location Map). Do not leave a known source without its location.
+
+## Source Location Map
+
+Once a data item's `source` is identified, fetch/pick the value from its concrete `location`. Do not stop at the abstract source category.
+
+| source | location | Example |
+| --- | --- | --- |
+| `ENVIRONMENT` | `.env` file, keyed by the exact variable name, loaded via `src/config/env.ts` | `location: ".env -> BASE_URL"`, `reference: "BASE_URL"` |
+| `SECRET_STORE` | Approved external secret manager / CI secret, keyed by its exact secret name (never the value) | `location: "CI secret store -> ORANGEHRM_HR_PASSWORD"` |
+| `FIXTURE` | Versioned fixture file under `test-data/`, keyed by its JSON path | `location: "test-data/orangehrm-add-employee.contract.json -> test_data[employee_id]"` |
+| `RUNTIME_GENERATOR` | Automation helper/library invoked at run time (faker, uuid, counter) | `location: "automation runtime generator: uuid()"` |
+| `API` | Exact endpoint, method, and field used to extract the value | `location: "GET /api/v2/courses -> data[0].id"` |
+| `DATABASE` | Exact schema/table/column and lookup key | `location: "hr_db.employee -> employee_id"` |
+| `APPLICATION_UI` | Exact screen/control where the value must be read at run time | `location: "Admin > Add User form -> Role dropdown options"` |
+| `REQUIREMENT` | The requirement or acceptance-criteria line that states the literal value | `location: "Acceptance criteria line: 'Dashboard'"` |
+| `UNRESOLVED` | No location known; must be listed in `unresolved_data` | omit `location` |
+
+Rules:
+
+1. Never guess a `location`. If the exact file, endpoint, table, or screen is not confirmed, use `source: "UNRESOLVED"` and add the item to `unresolved_data`.
+2. Prefer the repository's existing convention: environment values belong in `.env` (see `.env.example`) and are read through `src/config/env.ts`; do not invent a new config mechanism.
+3. A `SECRET_REFERENCE` item must never place the secret value in `location`; only the variable/secret name.
+4. When a value depends on a prior step or another data item (e.g. an ID returned by a previous API call), record that in `depends_on`, and set `location` to describe how it is captured (e.g. "response of step 2 API_CREATE").
 
 ## Mandatory / Non-Mandatory Field Rules
 
@@ -223,6 +247,7 @@ When applicable, identify:
 - test_condition
 - reference
 - source
+- location
 - scope
 - cleanup_strategy
 

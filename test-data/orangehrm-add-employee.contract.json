@@ -1,0 +1,225 @@
+{
+    "status": "DATA_SOURCE_REQUIRED",
+    "test_data": [
+        {
+            "name": "hr_username",
+            "entity": "User",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "EXISTING_FIXTURE",
+            "reference": "ORANGEHRM_HR_USERNAME",
+            "source": "UNRESOLVED",
+            "strategy": "Use a pre-provisioned, non-production authorized HR user account; do not invent credentials.",
+            "constraints": [
+                "Account must have HR/PIM Add Employee authorization",
+                "Must not be a production account"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "hr_password",
+            "entity": "User",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "SECRET_REFERENCE",
+            "reference": "ORANGEHRM_HR_PASSWORD",
+            "source": "UNRESOLVED",
+            "depends_on": [
+                "hr_username"
+            ],
+            "strategy": "Resolve from an approved secret store or environment variable at runtime; never hardcode.",
+            "constraints": [
+                "Must never appear in code, logs, or reports"
+            ],
+            "sensitive": true
+        },
+        {
+            "name": "employee_first_name",
+            "entity": "Employee",
+            "type": "string",
+            "application_required": "UNKNOWN",
+            "test_data_required": true,
+            "classification": "SYNTHETIC",
+            "reference": "employee_first_name",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: faker.person.firstName()",
+            "strategy": "Generate a synthetic, non-production first name at runtime.",
+            "constraints": [
+                "Field-level format/length constraints not confirmed by acceptance criteria"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "employee_middle_name",
+            "entity": "Employee",
+            "type": "string",
+            "application_required": "UNKNOWN",
+            "test_data_required": true,
+            "classification": "SYNTHETIC",
+            "reference": "employee_middle_name",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: faker.person.middleName()",
+            "strategy": "Generate a synthetic, non-production middle name at runtime.",
+            "constraints": [
+                "Mandatory status not confirmed by acceptance criteria"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "employee_last_name",
+            "entity": "Employee",
+            "type": "string",
+            "application_required": "UNKNOWN",
+            "test_data_required": true,
+            "classification": "SYNTHETIC",
+            "reference": "employee_last_name",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: faker.person.lastName()",
+            "strategy": "Generate a synthetic, non-production last name at runtime.",
+            "constraints": [
+                "Field-level format/length constraints not confirmed by acceptance criteria"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "employee_id",
+            "entity": "Employee",
+            "type": "string",
+            "application_required": "UNKNOWN",
+            "test_data_required": true,
+            "classification": "UNIQUE",
+            "reference": "employee_id",
+            "source": "RUNTIME_GENERATOR",
+            "location": "automation runtime generator: uuid()/counter()",
+            "strategy": "Generate a unique employee ID at runtime to avoid collisions across parallel/concurrent runs; use for creation, list verification, and post-test cleanup.",
+            "constraints": [
+                "Must be unique within the shared test environment for the run duration",
+                "Uniqueness/format constraints not confirmed by acceptance criteria"
+            ],
+            "sensitive": false,
+            "scope": "TEST_RUN",
+            "cleanup_strategy": "After test verification, delete the created employee record via PIM > Employee List (select record > Delete) so no residual data remains in the shared environment."
+        },
+        {
+            "name": "required_field_under_test",
+            "entity": "Employee",
+            "type": "string",
+            "application_required": "UNKNOWN",
+            "test_data_required": false,
+            "test_condition": "missing",
+            "classification": "STATIC",
+            "reference": "EMPLOYEE_REQUIRED_FIELD_RULES_REQUIRED",
+            "source": "UNRESOLVED",
+            "strategy": "Identify the specific mandatory field to omit for validation testing once the mandatory-field rule is confirmed.",
+            "constraints": [
+                "Which field(s) among First Name, Middle Name, Last Name, Employee ID are mandatory is not stated in the acceptance criteria"
+            ],
+            "sensitive": false
+        }
+    ],
+    "unresolved_data": [
+        "hr_username",
+        "hr_password",
+        "required_field_under_test"
+    ],
+    "test_step_data": [
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 1,
+            "action": "Log in as an authorized HR user.",
+            "test_data": "DATA_SOURCE_REQUIRED: hr_username; DATA_SOURCE_REQUIRED: hr_password"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 2,
+            "action": "Navigate to PIM -> Add Employee.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 3,
+            "action": "Enter First Name.",
+            "test_data": "employee_first_name=RUNTIME_GENERATOR: employee_first_name"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 4,
+            "action": "Enter Middle Name.",
+            "test_data": "employee_middle_name=RUNTIME_GENERATOR: employee_middle_name"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 5,
+            "action": "Enter Last Name.",
+            "test_data": "employee_last_name=RUNTIME_GENERATOR: employee_last_name"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 6,
+            "action": "Enter Employee ID.",
+            "test_data": "employee_id=RUNTIME_GENERATOR: employee_id"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 7,
+            "action": "Save the employee record.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 8,
+            "action": "Verify a confirmation is displayed after creation.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 9,
+            "action": "Verify the saved employee appears in the Employee List.",
+            "test_data": "employee_id=RUNTIME_GENERATOR: employee_id"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-001",
+            "step": 10,
+            "action": "Cleanup: delete the created employee record so no residual data remains in the shared environment.",
+            "test_data": "employee_id=RUNTIME_GENERATOR: employee_id"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-002",
+            "step": 1,
+            "action": "Log in as an authorized HR user.",
+            "test_data": "DATA_SOURCE_REQUIRED: hr_username; DATA_SOURCE_REQUIRED: hr_password"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-002",
+            "step": 2,
+            "action": "Navigate to PIM -> Add Employee.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-002",
+            "step": 3,
+            "action": "Leave the mandatory field under test blank while entering the remaining fields.",
+            "test_data": "DATA_SOURCE_REQUIRED: required_field_under_test; employee_first_name=RUNTIME_GENERATOR: employee_first_name; employee_middle_name=RUNTIME_GENERATOR: employee_middle_name; employee_last_name=RUNTIME_GENERATOR: employee_last_name; employee_id=RUNTIME_GENERATOR: employee_id"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-002",
+            "step": 4,
+            "action": "Attempt to save the employee record.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-002",
+            "step": 5,
+            "action": "Verify a required-field validation error is displayed and the record is not saved.",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-EMPLOYEE-002",
+            "step": 6,
+            "action": "Cleanup: confirm no employee record was created; no data removal required.",
+            "test_data": "N/A"
+        }
+    ]
+}

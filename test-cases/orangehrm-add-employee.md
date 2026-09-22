@@ -1,0 +1,31 @@
+# OrangeHRM Add Employee Test Cases
+
+Source data contract: `test-data/orangehrm-add-employee.contract.json` (status: `DATA_SOURCE_REQUIRED`)
+
+| Test Case ID | Test Scenario | Preconditions | Step | Test Step | Test Data | Expected Result |
+| --- | --- | --- | ---: | --- | --- | --- |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 1 | Log in as an authorized HR user. | `DATA_SOURCE_REQUIRED: hr_username; DATA_SOURCE_REQUIRED: hr_password` | The HR user is authenticated. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 2 | Navigate to PIM → Add Employee. | `N/A` | The Add Employee page is displayed. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 3 | Enter First Name. | `employee_first_name=RUNTIME_GENERATOR: employee_first_name` | The First Name field accepts the value. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 4 | Enter Middle Name. | `employee_middle_name=RUNTIME_GENERATOR: employee_middle_name` | The Middle Name field accepts the value. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 5 | Enter Last Name. | `employee_last_name=RUNTIME_GENERATOR: employee_last_name` | The Last Name field accepts the value. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 6 | Enter Employee ID. | `employee_id=RUNTIME_GENERATOR: employee_id` | The Employee ID field accepts the value. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 7 | Save the employee record. | `N/A` | The employee is saved without validation errors. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 8 | Verify a confirmation is displayed after creation. | `N/A` | A creation confirmation is shown. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 9 | Verify the saved employee appears in the Employee List. | `employee_id=RUNTIME_GENERATOR: employee_id` | The employee is found in the Employee List. |
+| TC-EMPLOYEE-001 | HR user successfully adds a new employee with all details | An authorized HR user account exists. The OrangeHRM application is available. | 10 | Clean up the employee created by this test run. | `employee_id=RUNTIME_GENERATOR: employee_id` | The employee record no longer exists in the environment. |
+| TC-EMPLOYEE-002 | Required-field validation prevents saving an incomplete employee | An authorized HR user account exists. The OrangeHRM application is available. The mandatory-field rule for First Name, Middle Name, Last Name, and Employee ID is not yet confirmed. | 1 | Log in as an authorized HR user. | `DATA_SOURCE_REQUIRED: hr_username; DATA_SOURCE_REQUIRED: hr_password` | The HR user is authenticated. |
+| TC-EMPLOYEE-002 | Required-field validation prevents saving an incomplete employee | An authorized HR user account exists. The OrangeHRM application is available. The mandatory-field rule for First Name, Middle Name, Last Name, and Employee ID is not yet confirmed. | 2 | Navigate to PIM → Add Employee. | `N/A` | The Add Employee page is displayed. |
+| TC-EMPLOYEE-002 | Required-field validation prevents saving an incomplete employee | An authorized HR user account exists. The OrangeHRM application is available. The mandatory-field rule for First Name, Middle Name, Last Name, and Employee ID is not yet confirmed. | 3 | Leave the mandatory field under test blank while entering the remaining fields. | `DATA_SOURCE_REQUIRED: required_field_under_test; employee_first_name=RUNTIME_GENERATOR: employee_first_name; employee_middle_name=RUNTIME_GENERATOR: employee_middle_name; employee_last_name=RUNTIME_GENERATOR: employee_last_name; employee_id=RUNTIME_GENERATOR: employee_id` | The remaining fields accept their values; the field under test remains empty. |
+| TC-EMPLOYEE-002 | Required-field validation prevents saving an incomplete employee | An authorized HR user account exists. The OrangeHRM application is available. The mandatory-field rule for First Name, Middle Name, Last Name, and Employee ID is not yet confirmed. | 4 | Attempt to save the employee record. | `N/A` | The save action is blocked. |
+| TC-EMPLOYEE-002 | Required-field validation prevents saving an incomplete employee | An authorized HR user account exists. The OrangeHRM application is available. The mandatory-field rule for First Name, Middle Name, Last Name, and Employee ID is not yet confirmed. | 5 | Verify a required-field validation error is displayed and the record is not saved. | `N/A` | A validation error is shown and no record is created. |
+| TC-EMPLOYEE-002 | Required-field validation prevents saving an incomplete employee | An authorized HR user account exists. The OrangeHRM application is available. The mandatory-field rule for First Name, Middle Name, Last Name, and Employee ID is not yet confirmed. | 6 | Confirm no employee record was created. | `N/A` | No residual data exists; no cleanup is required. |
+
+## Unresolved Data Dependencies
+
+The following data items block full execution and must be resolved before these test cases can run end-to-end:
+
+- `hr_username` / `hr_password` — approved HR credential source is not defined.
+- `required_field_under_test` — the specific mandatory field(s) among First Name, Middle Name, Last Name, and Employee ID are not confirmed by the acceptance criteria.
+
+TC-EMPLOYEE-002 is intentionally generic until `required_field_under_test` is resolved; it must not assume which field is mandatory.
