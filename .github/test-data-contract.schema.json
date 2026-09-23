@@ -8,6 +8,72 @@
     "test_data"
   ],
   "properties": {
+    "application_context": {
+      "type": "object",
+      "description": "Application-specific metadata used to resolve the contract without guessing.",
+      "properties": {
+        "application_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "UI_LOGIN",
+                "API_TOKEN",
+                "OAUTH2",
+                "BASIC_AUTH",
+                "CERTIFICATE",
+                "SESSION",
+                "NONE",
+                "UNRESOLVED"
+              ]
+            },
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "credential_references": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "cleanup": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "UI_DELETE",
+                "API_DELETE",
+                "DATABASE_DELETE",
+                "RESET_FIXTURE",
+                "DEACTIVATE",
+                "NONE",
+                "UNRESOLVED"
+              ]
+            },
+            "location": {
+              "type": "string",
+              "minLength": 1
+            },
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "status": {
       "type": "string",
       "enum": [
@@ -103,6 +169,72 @@
             "type": "string",
             "minLength": 1,
             "description": "Concrete, resolvable location for the source: file path (e.g. .env), endpoint, table name, or fixture path. Not required when source is UNRESOLVED."
+          },
+          "source_details": {
+            "type": "object",
+            "description": "Structured application-specific location details. Include only properties relevant to the source.",
+            "properties": {
+              "field_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "endpoint": {
+                "type": "string",
+                "minLength": 1
+              },
+              "method": {
+                "type": "string",
+                "enum": [
+                  "GET",
+                  "POST",
+                  "PUT",
+                  "PATCH",
+                  "DELETE"
+                ]
+              },
+              "response_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "table": {
+                "type": "string",
+                "minLength": 1
+              },
+              "column": {
+                "type": "string",
+                "minLength": 1
+              },
+              "where": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fixture_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "mandatory": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "const": "UNKNOWN"
+                  }
+                ]
+              },
+              "cleanup_method": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
           },
           "strategy": {
             "type": "string",

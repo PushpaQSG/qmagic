@@ -20,3 +20,12 @@ The Test Data Agent is responsible for determining the data requirement, classif
 The Test Case Agent is responsible for placing the resolved test-data reference into the `Test Data` column.
 
 The Automation Agent will later consume these test-data references when generating the automation script.
+
+## Required Output Format
+
+Return the generated test cases as a Markdown table with exactly these columns, in this order:
+
+| TCID | Test Objective | Test Steps | Test Data |
+| ---- | -------------- | ---------- | --------- |
+
+Use one row per test scenario. `Test Steps` must contain numbered actions separated with `<br>`. `Test Data` must contain the matching numbered entries copied from the Test Data Contract's `test_step_data`, also separated with `<br>`. Use `N/A` when an action needs no data and `DATA_SOURCE_REQUIRED: <name>` when the contract identifies an unresolved dependency. Do not add separate Preconditions, Expected Result, or Step columns unless explicitly requested.

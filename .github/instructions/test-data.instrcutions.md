@@ -25,6 +25,18 @@ The LLM must NOT invent application-specific test data.
 
 Read `.github/test-data-contract.schema.json` before producing or changing a test-data contract. Use `.github/agents/test-data-agent.md` as the authoritative analysis workflow.
 
+## Token and Memory Efficiency
+
+1. Load the schema once per generation workflow, then load only the contract relevant to the current requirement.
+2. Do not include unrelated contracts, generated test scripts, reports, or full application documentation in the prompt.
+3. Keep the contract as a stable data definition. Store runtime-generated values only in the test execution context, not in the JSON file.
+4. Use concise `strategy`, `constraints`, and `location` text. Do not repeat the same policy in every data item; keep shared policy here.
+5. Use `test_step_data` only for steps that will become test-case rows. Do not duplicate the same data definition inside `test_data` and `test_step_data`.
+6. Pass unresolved identifiers and references, not secret values or large data payloads.
+7. For large suites, generate one contract per scenario and process scenarios independently rather than sending the entire suite in one prompt.
+
+The minimum generation context is: the requirement, the applicable instructions, the schema structure, and the single relevant contract. The generated test case should contain only the requested output columns.
+
 ## Data Classification
 
 Use one of:
@@ -64,6 +76,7 @@ Use one of:
 21. When test steps are known, add `test_step_data` to the contract. It must contain one entry per test-case step with `test_case_id`, `step`, `action`, and `test_data`.
 22. Format each step value as semicolon-separated `name=reference` pairs. Use `N/A` only when the action truly needs no data; use `DATA_SOURCE_REQUIRED: <name>` when it cannot run until a source is provided.
 23. Once `source` is identified, resolve and record the concrete `location` where that data actually lives (see Source Location Map). Do not leave a known source without its location.
+24. Record application-wide authentication and cleanup in `application_context`; record data-specific fields, endpoints, tables, fixtures, options, and mandatory rules in `source_details`.
 
 ## Source Location Map
 
@@ -87,6 +100,72 @@ Rules:
 2. Prefer the repository's existing convention: environment values belong in `.env` (see `.env.example`) and are read through `src/config/env.ts`; do not invent a new config mechanism.
 3. A `SECRET_REFERENCE` item must never place the secret value in `location`; only the variable/secret name.
 4. When a value depends on a prior step or another data item (e.g. an ID returned by a previous API call), record that in `depends_on`, and set `location` to describe how it is captured (e.g. "response of step 2 API_CREATE").
+
+## Application-Specific Contract Details
+
+Use the structured fields below when the requirement or application context provides the information. Do not invent missing values.
+
+### Shared application context
+
+```json
+"application_context": {
+   "application_name": "Example App",
+   "authentication": {
+      "method": "UI_LOGIN",
+      "location": ".env -> BASE_URL and credential references",
+      "credential_references": ["qa_username", "qa_password"]
+   },
+   "cleanup": {
+      "method": "API_DELETE",
+      "location": "DELETE /api/test-records/{id}",
+      "required": true
+   }
+}
+```
+
+### Per-data source details
+
+Add `source_details` inside the relevant `test_data` item:
+
+| Information | Contract location | Example |
+| --- | --- | --- |
+| UI field name | `source_details.field_name` | `Employee ID` |
+| API endpoint | `source_details.endpoint` + `source_details.method` | `GET /api/courses` |
+| API value path | `source_details.response_path` | `data[0].id` |
+| Database table/column | `source_details.table` + `source_details.column` | `hr.employee.employee_id` |
+| Database filter | `source_details.where` | `status = 'ACTIVE'` |
+| Fixture path | `source_details.fixture_path` | `test-data/users.json -> users[0]` |
+| Valid dropdown values | `source_details.options` | `["Admin", "ESS"]` |
+| Mandatory-field rule | `source_details.mandatory` | `true`, `false`, or `"UNKNOWN"` |
+| Data cleanup | `source_details.cleanup_method` | `DELETE /api/employees/{employee_id}` |
+
+Example:
+
+```json
+{
+   "name": "employee_id",
+   "entity": "Employee",
+   "type": "string",
+   "application_required": true,
+   "test_data_required": true,
+   "classification": "UNIQUE",
+   "reference": "employee_id",
+   "source": "RUNTIME_GENERATOR",
+   "location": "automation runtime generator: uuid()",
+   "source_details": {
+      "field_name": "Employee ID",
+      "mandatory": true,
+      "cleanup_method": "PIM > Employee List > delete by Employee ID"
+   },
+   "strategy": "Generate a unique Employee ID at runtime.",
+   "constraints": ["Must not already exist in the test environment."],
+   "sensitive": false,
+   "scope": "TEST_RUN",
+   "cleanup_strategy": "Delete the created employee after verification."
+}
+```
+
+If a location or rule is not provided, use `source: "UNRESOLVED"`, omit unconfirmed `source_details`, and add the data name to `unresolved_data`.
 
 ## Mandatory / Non-Mandatory Field Rules
 

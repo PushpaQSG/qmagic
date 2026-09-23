@@ -10,23 +10,37 @@ The `Test Data` column must contain test-data references or values that can be c
 
 The Test Case Agent must use the Test Data Agent as the source of truth for test-data classification, source, strategy, dependencies, and availability.
 
-When the Test Data Contract includes `test_step_data`, copy its matching `test_data` expression into each generated row. Every test-case row must contain a `Test Data` value: a semicolon-separated `name=reference` expression, `DATA_SOURCE_REQUIRED: <name>`, or `N/A`.
+When the Test Data Contract includes `test_step_data`, copy its matching `test_data` expression into the corresponding numbered entry in the `Test Data` cell. Every test scenario row must contain one ordered `Test Data` entry for every numbered action: a semicolon-separated `name=reference` expression, `DATA_SOURCE_REQUIRED: <name>`, or `N/A`.
 
 ---
 
+## Token and Memory Efficiency
+
+Load only the requirement, the relevant Test Data Contract, and the rules needed for the current test scenario. Do not load unrelated contracts or repeat the full schema in the generated response.
+
+The final response must contain only the requested four-column table. Keep data references compact; do not include contract descriptions, source locations, constraints, secrets, or runtime values in the test case unless they are needed to identify an unresolved dependency.
+
 ## Test Case Output Structure
 
-Every test case must contain the following columns:
+The generated output must be a Markdown table with exactly these columns, in this order:
 
-| Column          | Description                          |
-| --------------- | ------------------------------------ |
-| Test Case ID    | Unique test case identifier          |
-| Test Scenario   | Description of the scenario          |
-| Preconditions   | Conditions required before execution |
-| Step            | Step number                          |
-| Test Step       | Action performed by the tester       |
-| Test Data       | Data required to execute the step    |
-| Expected Result | Expected outcome of the step         |
+| TCID | Test Objective | Test Steps | Test Data |
+| ---- | -------------- | ---------- | --------- |
+
+Rules:
+
+1. `TCID` is a unique test-case identifier, such as `TC-EMPLOYEE-001`.
+2. `Test Objective` states the behavior being verified.
+3. `Test Steps` contains the ordered actions. Use `<br>` between actions when more than one step is required; prefix each action with its step number.
+4. `Test Data` contains the matching ordered data expressions. Use `<br>` between entries and keep each entry aligned with the corresponding `Test Steps` action.
+5. Do not add `Preconditions`, `Step`, `Expected Result`, or other columns unless the user explicitly requests them.
+6. Include one row per test scenario, not one row per action.
+
+Example:
+
+| TCID | Test Objective | Test Steps | Test Data |
+| ---- | -------------- | ---------- | --------- |
+| TC-EMPLOYEE-001 | Add a new employee successfully | 1. Log in as an authorized HR user.<br>2. Navigate to PIM → Add Employee.<br>3. Enter employee details.<br>4. Save the employee.<br>5. Verify the employee and confirmation. | 1. `DATA_SOURCE_REQUIRED: hr_username; DATA_SOURCE_REQUIRED: hr_password`<br>2. `N/A`<br>3. `employee_first_name=RUNTIME_GENERATOR: employee_first_name; employee_middle_name=RUNTIME_GENERATOR: employee_middle_name; employee_last_name=RUNTIME_GENERATOR: employee_last_name; employee_id=RUNTIME_GENERATOR: employee_id`<br>4. `N/A`<br>5. `employee_id=RUNTIME_GENERATOR: employee_id` |
 
 ---
 
