@@ -1,153 +1,157 @@
 {
-  "status": "DATA_SOURCE_REQUIRED",
-  "test_data": [
-    {
-      "name": "login_page_url",
-      "entity": "Navigation",
-      "type": "url",
-      "application_required": true,
-      "test_data_required": true,
-      "classification": "STATIC",
-      "reference": "BASE_URL",
-      "source": "ENVIRONMENT",
-      "location": ".env -> BASE_URL",
-      "strategy": "Read the OrangeHRM application base URL from environment configuration via src/config/env.ts.",
-      "constraints": [
-        "Must be a reachable, non-production OrangeHRM test environment URL",
-        "Must be defined as BASE_URL in .env"
-      ],
-      "sensitive": false
-    },
-    {
-      "name": "orangehrm_username",
-      "entity": "Credentials",
-      "type": "string",
-      "application_required": true,
-      "test_data_required": true,
-      "classification": "SECRET_REFERENCE",
-      "reference": "ORANGEHRM_USERNAME",
-      "source": "UNRESOLVED",
-      "strategy": "Resolve from an approved environment variable once a naming convention for OrangeHRM login credentials is defined in .env.example; do not hardcode or invent a value.",
-      "constraints": [
-        "Must belong to a registered, active OrangeHRM user account",
-        "Must not be a production credential",
-        "Value must never appear in code, logs, or reports"
-      ],
-      "sensitive": true
-    },
-    {
-      "name": "orangehrm_password",
-      "entity": "Credentials",
-      "type": "string",
-      "application_required": true,
-      "test_data_required": true,
-      "classification": "SECRET_REFERENCE",
-      "reference": "ORANGEHRM_PASSWORD",
-      "source": "UNRESOLVED",
-      "depends_on": ["orangehrm_username"],
-      "strategy": "Resolve from an approved environment variable once a naming convention for OrangeHRM login credentials is defined in .env.example; do not hardcode or invent a value.",
-      "constraints": [
-        "Must be the correct password for orangehrm_username",
-        "Must not be a production credential",
-        "Value must never appear in code, logs, or reports"
-      ],
-      "sensitive": true
-    },
-    {
-      "name": "invalid_password",
-      "entity": "Credentials",
-      "type": "string",
-      "application_required": true,
-      "test_data_required": true,
-      "test_condition": "invalid",
-      "classification": "SYNTHETIC",
-      "depends_on": ["orangehrm_username"],
-      "strategy": "Generate a fixed synthetic password value distinct from the valid credential; never derive from production data.",
-      "constraints": [
-        "Must not equal the valid password resolved for orangehrm_username",
-        "Must be a non-empty string"
-      ],
-      "sensitive": false
-    },
-    {
-      "name": "username_missing",
-      "entity": "Credentials",
-      "type": "string",
-      "application_required": true,
-      "test_data_required": false,
-      "test_condition": "missing",
-      "classification": "STATIC",
-      "strategy": "Leave the username field empty to trigger required-field validation.",
-      "constraints": [
-        "Value must be an empty string"
-      ],
-      "sensitive": false
-    },
-    {
-      "name": "password_missing",
-      "entity": "Credentials",
-      "type": "string",
-      "application_required": true,
-      "test_data_required": false,
-      "test_condition": "missing",
-      "classification": "STATIC",
-      "strategy": "Leave the password field empty to trigger required-field validation.",
-      "constraints": [
-        "Value must be an empty string"
-      ],
-      "sensitive": false
-    },
-    {
-      "name": "dashboard_destination",
-      "entity": "Session",
-      "type": "string",
-      "application_required": true,
-      "test_data_required": true,
-      "classification": "STATIC",
-      "reference": "Dashboard",
-      "source": "REQUIREMENT",
-      "location": "Acceptance criteria line: 'redirected to the Dashboard'",
-      "strategy": "Use the literal destination named in the acceptance criteria to verify successful login redirect.",
-      "constraints": [
-        "Must match the destination named in the requirement: 'Dashboard'"
-      ],
-      "sensitive": false
-    }
-  ],
-  "unresolved_data": [
-    "orangehrm_username",
-    "orangehrm_password"
-  ],
-  "test_step_data": [
-    {
-      "test_case_id": "TC-LOGIN-001",
-      "step": 1,
-      "action": "Navigate to the OrangeHRM login page",
-      "test_data": "login_page_url=${BASE_URL}"
-    },
-    {
-      "test_case_id": "TC-LOGIN-001",
-      "step": 2,
-      "action": "Enter username",
-      "test_data": "DATA_SOURCE_REQUIRED: orangehrm_username"
-    },
-    {
-      "test_case_id": "TC-LOGIN-001",
-      "step": 3,
-      "action": "Enter password",
-      "test_data": "DATA_SOURCE_REQUIRED: orangehrm_password"
-    },
-    {
-      "test_case_id": "TC-LOGIN-001",
-      "step": 4,
-      "action": "Submit the login form",
-      "test_data": "N/A"
-    },
-    {
-      "test_case_id": "TC-LOGIN-001",
-      "step": 5,
-      "action": "Verify redirection to the Dashboard",
-      "test_data": "dashboard_destination=Dashboard"
-    }
-  ]
+    "status": "DATA_SOURCE_REQUIRED",
+    "test_data": [
+        {
+            "name": "login_page_url",
+            "entity": "Navigation",
+            "type": "url",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "BASE_URL",
+            "source": "ENVIRONMENT",
+            "location": ".env -> BASE_URL",
+            "strategy": "Read the OrangeHRM application base URL from environment configuration via src/config/env.ts.",
+            "constraints": [
+                "Must be a reachable, non-production OrangeHRM test environment URL",
+                "Must be defined as BASE_URL in .env"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "orangehrm_username",
+            "entity": "Credentials",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "SECRET_REFERENCE",
+            "reference": "ORANGEHRM_USERNAME",
+            "source": "UNRESOLVED",
+            "strategy": "Resolve from an approved environment variable once a naming convention for OrangeHRM login credentials is defined in .env.example; do not hardcode or invent a value.",
+            "constraints": [
+                "Must belong to a registered, active OrangeHRM user account",
+                "Must not be a production credential",
+                "Value must never appear in code, logs, or reports"
+            ],
+            "sensitive": true
+        },
+        {
+            "name": "orangehrm_password",
+            "entity": "Credentials",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "SECRET_REFERENCE",
+            "reference": "ORANGEHRM_PASSWORD",
+            "source": "UNRESOLVED",
+            "depends_on": [
+                "orangehrm_username"
+            ],
+            "strategy": "Resolve from an approved environment variable once a naming convention for OrangeHRM login credentials is defined in .env.example; do not hardcode or invent a value.",
+            "constraints": [
+                "Must be the correct password for orangehrm_username",
+                "Must not be a production credential",
+                "Value must never appear in code, logs, or reports"
+            ],
+            "sensitive": true
+        },
+        {
+            "name": "invalid_password",
+            "entity": "Credentials",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "test_condition": "invalid",
+            "classification": "SYNTHETIC",
+            "depends_on": [
+                "orangehrm_username"
+            ],
+            "strategy": "Generate a fixed synthetic password value distinct from the valid credential; never derive from production data.",
+            "constraints": [
+                "Must not equal the valid password resolved for orangehrm_username",
+                "Must be a non-empty string"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "username_missing",
+            "entity": "Credentials",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": false,
+            "test_condition": "missing",
+            "classification": "STATIC",
+            "strategy": "Leave the username field empty to trigger required-field validation.",
+            "constraints": [
+                "Value must be an empty string"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "password_missing",
+            "entity": "Credentials",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": false,
+            "test_condition": "missing",
+            "classification": "STATIC",
+            "strategy": "Leave the password field empty to trigger required-field validation.",
+            "constraints": [
+                "Value must be an empty string"
+            ],
+            "sensitive": false
+        },
+        {
+            "name": "dashboard_destination",
+            "entity": "Session",
+            "type": "string",
+            "application_required": true,
+            "test_data_required": true,
+            "classification": "STATIC",
+            "reference": "Dashboard",
+            "source": "REQUIREMENT",
+            "location": "Acceptance criteria line: 'redirected to the Dashboard'",
+            "strategy": "Use the literal destination named in the acceptance criteria to verify successful login redirect.",
+            "constraints": [
+                "Must match the destination named in the requirement: 'Dashboard'"
+            ],
+            "sensitive": false
+        }
+    ],
+    "unresolved_data": [
+        "orangehrm_username",
+        "orangehrm_password"
+    ],
+    "test_step_data": [
+        {
+            "test_case_id": "TC-LOGIN-001",
+            "step": 1,
+            "action": "Navigate to the OrangeHRM login page",
+            "test_data": "login_page_url=${BASE_URL}"
+        },
+        {
+            "test_case_id": "TC-LOGIN-001",
+            "step": 2,
+            "action": "Enter username",
+            "test_data": "DATA_SOURCE_REQUIRED: orangehrm_username"
+        },
+        {
+            "test_case_id": "TC-LOGIN-001",
+            "step": 3,
+            "action": "Enter password",
+            "test_data": "DATA_SOURCE_REQUIRED: orangehrm_password"
+        },
+        {
+            "test_case_id": "TC-LOGIN-001",
+            "step": 4,
+            "action": "Submit the login form",
+            "test_data": "N/A"
+        },
+        {
+            "test_case_id": "TC-LOGIN-001",
+            "step": 5,
+            "action": "Verify redirection to the Dashboard",
+            "test_data": "dashboard_destination=Dashboard"
+        }
+    ]
 }
