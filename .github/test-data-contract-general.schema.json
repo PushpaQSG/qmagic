@@ -1,0 +1,411 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/test-data-contract-general.schema.json",
+  "title": "General-Purpose QA Test Data Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "status",
+    "application_context",
+    "test_data",
+    "test_step_data",
+    "unresolved_data"
+  ],
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "DATA_SOURCE_REQUIRED"
+      ]
+    },
+    "application_context": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "application": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "base_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "authentication_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "cleanup_policy": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "test_data": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/testDataItem"
+      }
+    },
+    "test_step_data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "test_case_id",
+          "step",
+          "action",
+          "test_data"
+        ],
+        "properties": {
+          "test_case_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "step": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "test_data": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "unresolved_data": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "READY"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "unresolved_data": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "dataType": {
+      "type": "string",
+      "enum": [
+        "string",
+        "integer",
+        "number",
+        "boolean",
+        "date",
+        "datetime",
+        "enum",
+        "identifier",
+        "object",
+        "array",
+        "secret_reference",
+        "file",
+        "binary"
+      ]
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "UNIQUE",
+        "SYNTHETIC",
+        "STATIC",
+        "ENUM",
+        "API_RETRIEVED",
+        "API_CREATE",
+        "EXISTING_FIXTURE",
+        "DB_LOOKUP",
+        "APPLICATION_UI",
+        "DEPENDENT",
+        "SECRET_REFERENCE",
+        "FILE_FIXTURE",
+        "ENVIRONMENT_CONFIG",
+        "DATE_TIME"
+      ]
+    },
+    "strategy": {
+      "type": "string",
+      "enum": [
+        "GENERATE",
+        "CONFIGURATION",
+        "API_GET",
+        "API_CREATE",
+        "FIXTURE_LOOKUP",
+        "DB_LOOKUP",
+        "APPLICATION_UI",
+        "DEPENDENT",
+        "SECRET_REFERENCE",
+        "FILE_GENERATE"
+      ]
+    },
+    "testDataItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "entity",
+        "type",
+        "application_required",
+        "test_data_required",
+        "classification",
+        "strategy",
+        "constraints",
+        "sensitive"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "$ref": "#/$defs/dataType"
+        },
+        "application_required": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string",
+              "const": "UNKNOWN"
+            }
+          ]
+        },
+        "test_data_required": {
+          "type": "boolean"
+        },
+        "classification": {
+          "$ref": "#/$defs/classification"
+        },
+        "strategy": {
+          "$ref": "#/$defs/strategy"
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sensitive": {
+          "type": "boolean"
+        },
+        "example": {
+          "type": [
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "object",
+            "array",
+            "null"
+          ]
+        },
+        "reference": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "source_details": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "field_name": {
+              "type": "string"
+            },
+            "endpoint": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "method": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "response_path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "table": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "column": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "where": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "fixture_path": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "options": {
+              "type": "array"
+            },
+            "mandatory": {
+              "type": [
+                "boolean",
+                "string"
+              ]
+            },
+            "cleanup_method": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "depends_on": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "uniqueItems": true
+        },
+        "condition": {
+          "type": "string"
+        },
+        "test_condition": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "step",
+            "test",
+            "run",
+            "suite",
+            "environment"
+          ]
+        },
+        "cleanup_strategy": {
+          "type": "string"
+        },
+        "validation_status": {
+          "type": "string",
+          "enum": [
+            "NOT_VALIDATED",
+            "NOT_YET_VALIDATED",
+            "VALIDATED",
+            "REFERENCE_ONLY",
+            "NOT_YET_CREATED",
+            "FAILED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "classification": {
+                "const": "SECRET_REFERENCE"
+              }
+            },
+            "required": [
+              "classification"
+            ]
+          },
+          "then": {
+            "properties": {
+              "sensitive": {
+                "const": true
+              }
+            },
+            "not": {
+              "required": [
+                "example"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "classification": {
+                "enum": [
+                  "UNIQUE",
+                  "SYNTHETIC",
+                  "API_CREATE"
+                ]
+              }
+            },
+            "required": [
+              "classification"
+            ]
+          },
+          "then": {
+            "required": [
+              "scope",
+              "cleanup_strategy"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
